@@ -1,0 +1,22 @@
+FROM ubuntu:latest
+
+#This will install Tomcat. First Java is needed
+RUN apt-get update && \
+    apt-get install -y wget openjdk-8-jdk && \
+    wget https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.53/bin/apache-tomcat-8.0.53.tar.gz && \
+    tar xvf apache-tomcat-8.0.53.tar.gz && \
+    mv apache-tomcat-8.0.53 /usr/local/tomcat && \
+    rm apache-tomcat-8.0.53.tar.gz
+
+ENV CATALINA_HOME=/usr/local/tomcat
+ENV PATH=$CATALINA_HOME/bin:$PATH
+
+EXPOSE 8080
+
+WORKDIR /usr/local/tomcat/
+
+COPY tomcat-users.xml /usr/local/tomcat/conf/
+
+ADD https://get.jenkins.io/war-stable/2.7.1/jenkins.war /usr/local/tomcat/webapps/
+
+CMD ["catalina.sh", "run"]

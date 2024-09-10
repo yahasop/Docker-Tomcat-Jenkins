@@ -12,6 +12,12 @@ RUN apk update && \
 #This package is needed to enable graphics in older versions of Tomcat when tries to run Jenkins
 RUN apk add ttf-dejavu 
 
+#This line adds the JMX configurations to enable it. It writes into catalina.sh
+RUN sed -i '107i\CATALINA_OPTS="-Dcom.sun.management.jmxremote.port=8085 -Dcom.sun.management.jmxremote.rmi.port=8085 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"' /usr/local/tomcat/bin/catalina.sh
+
+#This set the working directory for the container
+WORKDIR /usr/local/tomcat/
+
 #Setting environment variables to add a Tomcat home and then add this to the $PATH in order to be able to execute scripts from there
 ENV CATALINA_HOME=/usr/local/tomcat 
 ENV PATH=$CATALINA_HOME/bin:$PATH
@@ -19,14 +25,11 @@ ENV PATH=$CATALINA_HOME/bin:$PATH
 #Typically Tomcat runs on port 8080
 EXPOSE 8080
 
-#This set the working directory for the container
-WORKDIR /usr/local/tomcat/
-
 #This copies the tomcat-users.xml file pre-populated with an admin user and password to enable the host manager UI
 COPY tomcat-users.xml /usr/local/tomcat/conf/
 
 #This dowloads the Jenkins war into the webapps path, where Tomcat search for the web apps to host and deploy
-ADD https://get.jenkins.io/war-stable/2.7.1/jenkins.war /usr/local/tomcat/webapps/
+ADD https://get.jenkins.io/war-stable/2.303.1/jenkins.war /usr/local/tomcat/webapps/
 
 #The catalina.sh is the script that runs everything needed to start the Tomcat service
 CMD ["catalina.sh", "run"]
